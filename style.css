@@ -1,0 +1,13 @@
+body {
+    background-color: rgb(35, 158, 117);
+}
+
+.temaEscuro {
+    background-color: rgb(53, 53, 53);
+    color: aliceblue;
+}
+
+.temaClaro {
+    background-color: aliceblue;
+    color: black;
+}

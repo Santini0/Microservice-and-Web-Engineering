@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Correção</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- link:css atalho para incluir o link do css-->
+  </head>
+  <body id="tema" class="temaClaro fontX" onload="carregar()">
+    <header>
+      <h2>Correção dos exercícios</h2>
+    </header>
+    <input type="button" value="Tema" onclick="trocarTema()" />
+    <nav>
+      <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Sobre nós</a></li>
+      </ul>
+    </nav>
+    <section>
+      <h2>Exercício 3</h2>
+      <p><input type="text" id="texto" /></p>
+      <input type="button" onclick="adicionarItem()" value="Adicionar Item" />
+      <ul id="lista"></ul>
+
+      <h2>Exercício 4</h2>
+      <input
+        type="button"
+        onclick="trazerObjetoResponse()"
+        value="testar response"
+      />
+      <div id="mostraMensagem"></div>
+
+      <h2>Exercício 5</h2>
+      <form onsubmit="cadastrarUsuario()">
+        <p>Nome: <input type="text" id="nome" /></p>
+        <p>Email: <input type="email" id="email" /></p>
+        <p>Idade: <input type="number" id="idade" /></p>
+        <input type="submit"  value="Enviar" />
+      </form>
+
+      <h2>Exercício 6</h2>
+      <table>
+          <tr>
+              <th>id</th>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>Idade</th>
+          </tr>
+          <tbody id="tbUsuarios">
+
+          </tbody>
+      </table>
+
+      <h2>Exercício 7</h2> 
+      <input type="button" value="Maiores 18" onclick="filtrarMaiores()" />
+      <input type="button" value="limpar filtro"
+       onclick="limparFiltro()" />
+
+
+    </section>
+  </body>
+  <script>
+    //Localstorage é o "banco" local do browser
+    function carregar() {
+      let tema = localStorage.getItem("tema");
+      if (tema) {
+        if (tema == "temaClaro") {
+          document.getElementById("tema").classList.remove("temaEscuro");
+          document.getElementById("tema").classList.add(tema);
+        } else {
+          document.getElementById("tema").classList.remove("temaClaro");
+          document.getElementById("tema").classList.add(tema);
+        }
+      }
+    }
+
+    function trocarTema() {
+      let temaElement = document.getElementById("tema");
+      if (temaElement.classList.contains("temaClaro")) {
+        temaElement.classList.remove("temaClaro");
+        temaElement.classList.add("temaEscuro");
+        localStorage.setItem("tema", "temaEscuro");
+      } else {
+        temaElement.classList.remove("temaEscuro");
+        temaElement.classList.add("temaClaro");
+        localStorage.setItem("tema", "temaClaro");
+      }
+    }
+
+    function adicionarItem() {
+      const texto = document.getElementById("texto");
+      let lista = document.getElementById("lista");
+      let item = `<li>${texto.value}</li>`;
+      lista.innerHTML += item;
+      texto.value = "";
+    }
+
+    const objetoReponse = {};
+    objetoReponse.mensagem = "Olá, este é um retorno de teste";
+
+    function trazerObjetoResponse() {
+      fetch("https://67c78ea1c19eb8753e7a09da.mockapi.io/mensagem")
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          document.getElementById("mostraMensagem").innerHTML =
+            data[0].mensagem + " - id: " + data[0].id;
+        });
+    }
+
+    //Exercício 5
+    function cadastrarUsuario(){
+      event.preventDefault();
+      const nome = document.getElementById("nome").value;
+      const email = document.getElementById("email").value;
+      const idade = parseInt(document.getElementById("idade").value);
+      const dados = {
+        nome,
+        email,
+        idade
+      }
+
+      fetch("https://67c78ea1c19eb8753e7a09da.mockapi.io/usuario",
+        {
+          method: 'POST', 
+          headers:{
+            'Content-Type' : 'application/json'
+          },
+          body: JSON.stringify(dados)
+        }        
+      ).then(response => {
+          if(!response.ok){
+            throw new Error('Erro ao tentar inserir' + response.status)
+          }
+          return response.json();
+      }).then(data => {
+        console.log(data);
+        alert('Inserido com sucesso');
+        listarUsuarios(null);
+      }).catch(error =>{
+        console.error('Erro ao tentar inserir ' + error.mensagem)
+      });
+    }
+
+    //Exercício 6 
+    function listarUsuarios(filtro){
+      fetch("https://67c78ea1c19eb8753e7a09da.mockapi.io//usuario")
+      .then(response => response.json())
+      .then(dados => {
+        
+        let tbUsuario = document.getElementById("tbUsuarios")
+        tbUsuario.innerHTML = "";
+        let dadosUsuarios;
+        if(filtro != null)
+           dadosUsuarios = dados.filter(us => us.idade >= 18);
+        else 
+           dadosUsuarios = dados
+
+          dadosUsuarios.forEach(item => {
+          const linha = document.createElement("tr")
+          const tdId = document.createElement("td")
+          tdId.textContent = item.id
+          const tdNome = document.createElement("td")
+          tdNome.textContent = item.nome
+          const tdEmail = document.createElement("td")
+          tdEmail.textContent = item.email
+          const tdIdade = document.createElement("td")
+          tdIdade.textContent = item.idade
+
+          linha.appendChild(tdId)
+          linha.appendChild(tdNome)
+          linha.appendChild(tdEmail)
+          linha.appendChild(tdIdade)
+          tbUsuario.appendChild(linha)
+        });
+        
+      })
+    }
+
+    listarUsuarios(null);
+
+    function limparFiltro(){
+      listarUsuarios(null);
+    }
+
+    function filtrarMaiores(){
+       listarUsuarios(18)
+    }
+
+  </script>
+</html>
